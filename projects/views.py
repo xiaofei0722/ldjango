@@ -1,4 +1,6 @@
-from django.http import HttpResponse
+import json
+
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
 # Create your views here.
@@ -19,9 +21,17 @@ from django.views import View
 
 
 class IndexView(View):
-    def get(self,request):
-        # return HttpResponse('这是一个get请求')
-        return render(request, 'demo.html')
+    def get(self,request,pk):
+        data = {
+            'name': 'xiaofei',
+            "age": 17
+        }
+        dataj = json.dumps(data)
+        # return JsonResponse(content=data)
+
+        return HttpResponse(content=dataj,content_type='application/json', status=222)
+        # return HttpResponse('这是一个get请求,pk是'+str(pk))
+        # return render(request, 'demo.html')
     def post(self,request):
         return HttpResponse('这是一个Post请求')
 
