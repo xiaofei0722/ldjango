@@ -4,9 +4,11 @@ from django.db import models
 class Person(models.Model):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
-
+    class Meta:
+        verbose_name = '人类'
+        verbose_name_plural = '人类'
 class Projects(models.Model):
-    name = models.CharField(verbose_name='项目名称',max_length=200,unique=True,help_text='项目名称')
+    name = models.CharField(verbose_name='项目名称',max_length=200,unique=True,help_text='项目的名称')
     leader = models.CharField(verbose_name='负责人',max_length=50,help_text='负责人')
     tester = models.CharField(verbose_name='测试人员',max_length=50,help_text='测试人员')
     programer = models.CharField(verbose_name='开发人员',max_length=50,help_text='开发人员')
@@ -19,3 +21,6 @@ class Projects(models.Model):
 
         verbose_name = '项目'
         verbose_name_plural = '项目'
+
+    def __str__(self):
+        return self.name
