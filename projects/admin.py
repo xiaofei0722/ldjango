@@ -8,4 +8,4 @@ class PreojectsAdmin(admin.ModelAdmin):
     list_display = ['id','name','leader','tester']
 
 admin.site.register(Projects,PreojectsAdmin)
-# admin.site.register(Person)
+admin.site.register(Person)
