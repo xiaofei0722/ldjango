@@ -1,6 +1,6 @@
 import json
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render
 from django.db.models import Q
 # Create your views here.
@@ -8,6 +8,8 @@ from django.views import View
 import json
 from interfaces.models import Interface
 from projects.models import Projects
+from rest_framework.viewsets import ModelViewSet
+from projects.serializer import ProjectSerializer
 
 # def haha(request):
 #     if request.method == 'GET':
@@ -71,27 +73,34 @@ class ProjectsList(View):
 
         project_qs = Projects.objects.all()
 
-        project_list = []
+        # project_list = []
+        #
+        # for project in project_qs:
+        #
+        #     one_dict = {
+        #         'name':project.name,
+        #         'leader':project.leader,
+        #         'tester':project.tester,
+        #         'programer':project.programer,
+        #         'publish_app':project.publish_app,
+        #         'desc':project.desc
+        #     }
+        #
+        #     project_list.append(one_dict)
 
-        for project in project_qs:
+        serializer = ProjectSerializer(instance=project_qs,many=True)
 
-            one_dict = {
-                'name':project.name,
-                'leader':project.leader,
-                'tester':project.tester,
-                'programer':project.programer,
-                'publish_app':project.publish_app,
-                'desc':project.desc
-            }
-
-            project_list.append(one_dict)
-
-        return JsonResponse(project_list,safe=False)
+        return JsonResponse(serializer.data,safe=False)
 
     def post(self,request):
 
         json_data = request.body.decode('utf-8')
         python_data = json.loads(json_data,encoding='utf-8')
+        serializer = ProjectSerializer(data=python_data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception as e:
+            return JsonResponse(serializer.errors)
 
         # new_project = Projects.objects.create(name=python_data['name'],
         #                         leader=python_data['leader'],
@@ -100,67 +109,81 @@ class ProjectsList(View):
         #                         publish_app=python_data['publish_app'],
         #                         desc=python_data['desc'])
 
-        project = Projects.objects.create(**python_data)
+        project = Projects.objects.create(**serializer.validated_data)
 
 
-        one_dict = {
-            'name':project.name,
-            'leader':project.leader,
-            'tester':project.tester,
-            'programer':project.programer,
-            'publish_app':project.publish_app,
-            'desc':project.desc
-        }
+        # one_dict = {
+        #     'name':project.name,
+        #     'leader':project.leader,
+        #     'tester':project.tester,
+        #     'programer':project.programer,
+        #     'publish_app':project.publish_app,
+        #     'desc':project.desc
+        # }
 
+        serializer = ProjectSerializer(project)
 
-
-        return JsonResponse(one_dict)
+        return JsonResponse(serializer.data)
 
 class ProjectsDetail(View):
+    def get_object(self,pk):
+        try:
+            return Projects.objects.get(id=pk)
+        except Projects.DoesNotExist:
+            raise Http404
 
     def get(self,request,pk):
 
-        project = Projects.objects.get(id=pk)
+        project = self.get_object(pk)
 
-        one_dict = {
-            'name': project.name,
-            'leader': project.leader,
-            'tester': project.tester,
-            'programer': project.programer,
-            'publish_app': project.publish_app,
-            'desc': project.desc
-        }
 
-        return JsonResponse(one_dict)
+        # one_dict = {
+        #     'name': project.name,
+        #     'leader': project.leader,
+        #     'tester': project.tester,
+        #     'programer': project.programer,
+        #     'publish_app': project.publish_app,
+        #     'desc': project.desc
+        # }
+        serializer = ProjectSerializer(instance=project)
+
+        return JsonResponse(serializer.data)
 
     def put(self,request,pk):
 
-        project = Projects.objects.get(id=pk)
+        project = self.get_object(pk)
 
         json_data = request.body.decode('utf-8')
         python_data = json.loads(json_data, encoding='utf-8')
+        serializer = ProjectSerializer(data=python_data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception as e:
+            return JsonResponse(serializer.errors)
 
-        project.name = python_data['name']
-        project.leader = python_data['leader']
-        project.tester = python_data['tester']
-        project.programer = python_data['programer']
-        project.publish_app = python_data['publish_app']
-        project.desc = python_data['desc']
+        project.name = serializer.validated_data['name']
+        project.leader = serializer.validated_data['leader']
+        project.tester = serializer.validated_data['tester']
+        project.programer = serializer.validated_data['programer']
+        project.publish_app = serializer.validated_data['publish_app']
+        project.desc = serializer.validated_data['desc']
         project.save()
 
-        one_dict = {
-            'name': project.name,
-            'leader': project.leader,
-            'tester': project.tester,
-            'programer': project.programer,
-            'publish_app': project.publish_app,
-            'desc': project.desc
-        }
+        # one_dict = {
+        #     'name': project.name,
+        #     'leader': project.leader,
+        #     'tester': project.tester,
+        #     'programer': project.programer,
+        #     'publish_app': project.publish_app,
+        #     'desc': project.desc
+        # }
+        serializer = ProjectSerializer(project)
 
-        return JsonResponse(one_dict,status=201)
+        return JsonResponse(serializer,status=201)
 
 
     def delete(self,request,pk):
-        project = Projects.objects.get(id=pk)
+        project = self.get_object(pk)
         project.delete()
         return JsonResponse(None,safe=False,status=204)
+
