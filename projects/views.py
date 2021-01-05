@@ -70,7 +70,7 @@ from projects.serializer import ProjectSerializer
 class ProjectsList(View):
 
     def get(self,request):
-
+        #获取数据库模型对象（项目表中所有数据）
         project_qs = Projects.objects.all()
 
         # project_list = []
@@ -87,17 +87,20 @@ class ProjectsList(View):
         #     }
         #
         #     project_list.append(one_dict)
-
+        #将模型对象传入序列化器（序列化）
         serializer = ProjectSerializer(instance=project_qs,many=True)
-
+        #返回序列化器的data属性，safa是传入为非字典时需要加的参数
         return JsonResponse(serializer.data,safe=False)
 
     def post(self,request):
-
+        #将请求数据存入变量
         json_data = request.body.decode('utf-8')
+        #将请求的json数据转化为字典
         python_data = json.loads(json_data,encoding='utf-8')
+        #将字典传入序列化器（反序列化）
         serializer = ProjectSerializer(data=python_data)
         try:
+            #验证反序列化数据
             serializer.is_valid(raise_exception=True)
         except Exception as e:
             return JsonResponse(serializer.errors)
@@ -108,7 +111,7 @@ class ProjectsList(View):
         #                         programer=python_data['programer'],
         #                         publish_app=python_data['publish_app'],
         #                         desc=python_data['desc'])
-
+        #将验证无误后的数据进行数据库新增操作
         project = Projects.objects.create(**serializer.validated_data)
 
 
@@ -120,12 +123,13 @@ class ProjectsList(View):
         #     'publish_app':project.publish_app,
         #     'desc':project.desc
         # }
-
+        #将新增后的数据放入序列化器（序列化）
         serializer = ProjectSerializer(project)
-
+        # 返回序列化器的data属性
         return JsonResponse(serializer.data)
 
 class ProjectsDetail(View):
+    #创建一个方法进行获取单条数据并做异常效验
     def get_object(self,pk):
         try:
             return Projects.objects.get(id=pk)
@@ -133,7 +137,7 @@ class ProjectsDetail(View):
             raise Http404
 
     def get(self,request,pk):
-
+        #获取数据库对象
         project = self.get_object(pk)
 
 
@@ -145,18 +149,20 @@ class ProjectsDetail(View):
         #     'publish_app': project.publish_app,
         #     'desc': project.desc
         # }
+        #将对象传入序列化器（序列化）
         serializer = ProjectSerializer(instance=project)
 
         return JsonResponse(serializer.data)
 
     def put(self,request,pk):
-
+        # 获取数据库对象
         project = self.get_object(pk)
-
+        #获取请求数据并传入序列化器（反序列化）
         json_data = request.body.decode('utf-8')
         python_data = json.loads(json_data, encoding='utf-8')
         serializer = ProjectSerializer(data=python_data)
         try:
+            #验证修改数据
             serializer.is_valid(raise_exception=True)
         except Exception as e:
             return JsonResponse(serializer.errors)
@@ -177,9 +183,10 @@ class ProjectsDetail(View):
         #     'publish_app': project.publish_app,
         #     'desc': project.desc
         # }
+        #保存后的数据进行序列化操作
         serializer = ProjectSerializer(project)
 
-        return JsonResponse(serializer,status=201)
+        return JsonResponse(serializer.data,status=201)
 
 
     def delete(self,request,pk):
