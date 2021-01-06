@@ -9,7 +9,7 @@ import json
 from interfaces.models import Interface
 from projects.models import Projects
 from rest_framework.viewsets import ModelViewSet
-from projects.serializer import ProjectSerializer
+from projects.serializer import ProjectSerializer,ProjectModelSerializer
 
 # def haha(request):
 #     if request.method == 'GET':
@@ -88,7 +88,7 @@ class ProjectsList(View):
         #
         #     project_list.append(one_dict)
         #将模型对象传入序列化器（序列化）
-        serializer = ProjectSerializer(instance=project_qs,many=True)
+        serializer = ProjectModelSerializer(instance=project_qs,many=True)
         #返回序列化器的data属性，safa是传入为非字典时需要加的参数
         return JsonResponse(serializer.data,safe=False)
 
@@ -98,7 +98,7 @@ class ProjectsList(View):
         #将请求的json数据转化为字典
         python_data = json.loads(json_data,encoding='utf-8')
         #将字典传入序列化器（反序列化）
-        serializer = ProjectSerializer(data=python_data)
+        serializer = ProjectModelSerializer(data=python_data)
         try:
             #验证反序列化数据
             serializer.is_valid(raise_exception=True)
@@ -150,7 +150,7 @@ class ProjectsDetail(View):
         #     'desc': project.desc
         # }
         #将对象传入序列化器（序列化）
-        serializer = ProjectSerializer(instance=project)
+        serializer = ProjectModelSerializer(instance=project)
 
         return JsonResponse(serializer.data)
 
@@ -160,7 +160,7 @@ class ProjectsDetail(View):
         #获取请求数据并传入序列化器（反序列化）
         json_data = request.body.decode('utf-8')
         python_data = json.loads(json_data, encoding='utf-8')
-        serializer = ProjectSerializer(instance=project,data=python_data)
+        serializer = ProjectModelSerializer(instance=project,data=python_data)
         try:
             #验证修改数据
             serializer.is_valid(raise_exception=True)

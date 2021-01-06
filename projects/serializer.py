@@ -9,7 +9,9 @@ def is_unique_porject_name(name):
 class ProjectSerializer(serializers.Serializer):
 
     id = serializers.IntegerField(label='ID',read_only=True)
-    name = serializers.CharField(label='项目名称', max_length=200, help_text='项目的名称',write_only=True,validators=[UniqueValidator(queryset=Projects.objects.all(),message='项目名称不能重复'),is_unique_porject_name])
+    name = serializers.CharField(label='项目名称', max_length=200, help_text='项目的名称',write_only=True,validators=[UniqueValidator(queryset=Projects.objects.all(),message='项目名称不能重复'),is_unique_porject_name],
+                                 error_messages={'max_length':'长度不能超过200个字节',
+                                                 'min_length':'长度不能超过6个字节'})
     leader = serializers.CharField(label='负责人', max_length=50, help_text='负责人')
     tester = serializers.CharField(label='测试人员', max_length=50, help_text='测试人员')
     programer = serializers.CharField(label='开发人员', max_length=50, help_text='开发人员')
@@ -38,3 +40,30 @@ class ProjectSerializer(serializers.Serializer):
         instance.desc = validated_data['desc']
         instance.save()
         return instance
+
+class ProjectModelSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(label='项目名称', max_length=200,min_length=6, help_text='项目的名称', write_only=True,
+                                 validators=[UniqueValidator(queryset=Projects.objects.all(), message='项目名称不能重复'),
+                                             is_unique_porject_name])
+    class Meta:
+        model = Projects
+        # fields = "__all__"
+        # fields = ('id','name','leader','tester','programer')
+        exclude = ('publish_app', 'desc')
+        # read_only_fields = ('leader','test')
+        extra_kwargs = {
+            'leader':{
+                'write_only': True,
+                'error_messages':{'max_length':'长度不能超过200个字节','min_length':'长度不能少于6个字节'}
+            }
+
+        }
+    def validate_name(self,value):
+        if not value.endswith('项目'):
+            raise serializers.ValidationError(detail='项目名称必须以"项目"结尾')
+        return value
+
+    def validate(self, attrs):
+        if '飞' not in attrs['tester'] and '飞' not in attrs['leader']:
+            raise serializers.ValidationError('负责人或者测试人员必须名字带飞')
+        return attrs
