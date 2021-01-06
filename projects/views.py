@@ -112,8 +112,8 @@ class ProjectsList(View):
         #                         publish_app=python_data['publish_app'],
         #                         desc=python_data['desc'])
         #将验证无误后的数据进行数据库新增操作
-        project = Projects.objects.create(**serializer.validated_data)
-
+        # project = Projects.objects.create(**serializer.validated_data)
+        serializer.save()
 
         # one_dict = {
         #     'name':project.name,
@@ -124,7 +124,7 @@ class ProjectsList(View):
         #     'desc':project.desc
         # }
         #将新增后的数据放入序列化器（序列化）
-        serializer = ProjectSerializer(project)
+
         # 返回序列化器的data属性
         return JsonResponse(serializer.data)
 
@@ -160,20 +160,20 @@ class ProjectsDetail(View):
         #获取请求数据并传入序列化器（反序列化）
         json_data = request.body.decode('utf-8')
         python_data = json.loads(json_data, encoding='utf-8')
-        serializer = ProjectSerializer(data=python_data)
+        serializer = ProjectSerializer(instance=project,data=python_data)
         try:
             #验证修改数据
             serializer.is_valid(raise_exception=True)
         except Exception as e:
             return JsonResponse(serializer.errors)
 
-        project.name = serializer.validated_data['name']
-        project.leader = serializer.validated_data['leader']
-        project.tester = serializer.validated_data['tester']
-        project.programer = serializer.validated_data['programer']
-        project.publish_app = serializer.validated_data['publish_app']
-        project.desc = serializer.validated_data['desc']
-        project.save()
+        # project.name = serializer.validated_data['name']
+        # project.leader = serializer.validated_data['leader']
+        # project.tester = serializer.validated_data['tester']
+        # project.programer = serializer.validated_data['programer']
+        # project.publish_app = serializer.validated_data['publish_app']
+        # project.desc = serializer.validated_data['desc']
+        # project.save()
 
         # one_dict = {
         #     'name': project.name,
@@ -184,7 +184,7 @@ class ProjectsDetail(View):
         #     'desc': project.desc
         # }
         #保存后的数据进行序列化操作
-        serializer = ProjectSerializer(project)
+        serializer.save()
 
         return JsonResponse(serializer.data,status=201)
 
