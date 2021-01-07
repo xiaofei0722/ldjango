@@ -6,6 +6,12 @@ from django.db.models import Q
 # Create your views here.
 from django.views import View
 import json
+
+from rest_framework import status
+from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from interfaces.models import Interface
 from projects.models import Projects
 from rest_framework.viewsets import ModelViewSet
@@ -67,7 +73,7 @@ from projects.serializer import ProjectSerializer,ProjectModelSerializer
 #         return HttpResponse('这是一个delete请求')
 
 
-class ProjectsList(View):
+class ProjectsList(GenericAPIView):
 
     def get(self,request):
         #获取数据库模型对象（项目表中所有数据）
@@ -103,7 +109,7 @@ class ProjectsList(View):
             #验证反序列化数据
             serializer.is_valid(raise_exception=True)
         except Exception as e:
-            return JsonResponse(serializer.errors)
+            return Response(serializer.errors)
 
         # new_project = Projects.objects.create(name=python_data['name'],
         #                         leader=python_data['leader'],
@@ -126,19 +132,23 @@ class ProjectsList(View):
         #将新增后的数据放入序列化器（序列化）
 
         # 返回序列化器的data属性
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
 
-class ProjectsDetail(View):
-    #创建一个方法进行获取单条数据并做异常效验
-    def get_object(self,pk):
-        try:
-            return Projects.objects.get(id=pk)
-        except Projects.DoesNotExist:
-            raise Http404
+class ProjectsDetail(GenericAPIView):
+    #指定查询集
+    queryset = Projects.objects.all()
+    #指定需要使用到的序列化器类
+    serializer_class = ProjectModelSerializer
+
+    # def get_object(self,pk):
+    #     try:
+    #         return Projects.objects.get(id=pk)
+    #     except Projects.DoesNotExist:
+    #         raise Http404
 
     def get(self,request,pk):
         #获取数据库对象
-        project = self.get_object(pk)
+        project = self.get_object()
 
 
         # one_dict = {
@@ -152,11 +162,11 @@ class ProjectsDetail(View):
         #将对象传入序列化器（序列化）
         serializer = ProjectModelSerializer(instance=project)
 
-        return JsonResponse(serializer.data)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
     def put(self,request,pk):
         # 获取数据库对象
-        project = self.get_object(pk)
+        project = self.get_object()
         #获取请求数据并传入序列化器（反序列化）
         json_data = request.body.decode('utf-8')
         python_data = json.loads(json_data, encoding='utf-8')
@@ -165,7 +175,7 @@ class ProjectsDetail(View):
             #验证修改数据
             serializer.is_valid(raise_exception=True)
         except Exception as e:
-            return JsonResponse(serializer.errors)
+            return Response(serializer.errors)
 
         # project.name = serializer.validated_data['name']
         # project.leader = serializer.validated_data['leader']
@@ -186,11 +196,11 @@ class ProjectsDetail(View):
         #保存后的数据进行序列化操作
         serializer.save()
 
-        return JsonResponse(serializer.data,status=201)
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
 
 
     def delete(self,request,pk):
-        project = self.get_object(pk)
+        project = self.get_object()
         project.delete()
-        return JsonResponse(None,safe=False,status=204)
+        return Response(None,status=status.HTTP_204_NO_CONTENT)
 

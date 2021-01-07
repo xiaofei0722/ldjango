@@ -42,14 +42,14 @@ class ProjectSerializer(serializers.Serializer):
         return instance
 
 class ProjectModelSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(label='项目名称', max_length=200,min_length=6, help_text='项目的名称', write_only=True,
+    name = serializers.CharField(label='项目名称', max_length=200,min_length=6, help_text='项目的名称', #write_only=True,
                                  validators=[UniqueValidator(queryset=Projects.objects.all(), message='项目名称不能重复'),
                                              is_unique_porject_name])
     class Meta:
         model = Projects
-        # fields = "__all__"
+        fields = "__all__"
         # fields = ('id','name','leader','tester','programer')
-        exclude = ('publish_app', 'desc')
+        # exclude = ('publish_app', 'desc')
         # read_only_fields = ('leader','test')
         extra_kwargs = {
             'leader':{

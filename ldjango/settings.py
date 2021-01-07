@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
 from pathlib import Path
-
+# from rest_framework.renderers import BrowsableAPIRenderer , JSONRenderer
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,10 +38,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'rest_framework',
+    'rest_framework',
     'projects.apps.ProjectsConfig',
     'interfaces.apps.InterfacesConfig',
 ]
+
+# REST_FRAMEWORK = {
+#     #默认响应渲染类
+#     'DEFAULT_RENDERER_CLASSES':(
+#         #json渲染器为第一优先级
+#         'rest_framework.renderers.JSONRenderer',
+#         #可浏览的api渲染器为第二优先级
+#         'rest_framework.renderer.BrowsableAPIRenderer',
+#     )
+# }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
