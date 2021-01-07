@@ -160,7 +160,8 @@ class ProjectsDetail(GenericAPIView):
         #     'desc': project.desc
         # }
         #将对象传入序列化器（序列化）
-        serializer = ProjectModelSerializer(instance=project)
+        # serializer = ProjectModelSerializer(instance=project)
+        serializer = self.get_serializer(instance=project)
 
         return Response(serializer.data,status=status.HTTP_200_OK)
 
@@ -170,7 +171,9 @@ class ProjectsDetail(GenericAPIView):
         #获取请求数据并传入序列化器（反序列化）
         json_data = request.body.decode('utf-8')
         python_data = json.loads(json_data, encoding='utf-8')
-        serializer = ProjectModelSerializer(instance=project,data=python_data)
+        # serializer = ProjectModelSerializer(instance=project,data=python_data)
+        serializer = self.get_serializer(instance=project,data=python_data)
+
         try:
             #验证修改数据
             serializer.is_valid(raise_exception=True)
