@@ -41,17 +41,25 @@ INSTALLED_APPS = [
     'rest_framework',
     'projects.apps.ProjectsConfig',
     'interfaces.apps.InterfacesConfig',
+    'django_filters',
 ]
 
-# REST_FRAMEWORK = {
-#     #默认响应渲染类
-#     'DEFAULT_RENDERER_CLASSES':(
-#         #json渲染器为第一优先级
-#         'rest_framework.renderers.JSONRenderer',
-#         #可浏览的api渲染器为第二优先级
-#         'rest_framework.renderer.BrowsableAPIRenderer',
-#     )
-# }
+REST_FRAMEWORK = {
+    #默认响应渲染类
+    'DEFAULT_RENDERER_CLASSES':(
+        #json渲染器为第一优先级
+        'rest_framework.renderers.JSONRenderer',
+        # #可浏览的api渲染器为第二优先级
+        'rest_framework.renderers.BrowsableAPIRenderer'
+    ),
+    'DEFAULT_FILTER_BACKENDS':['rest_framework.filters.OrderingFilter',
+                               'django_filters.rest_framework.DjangoFilterBackend'],
+    #在全局制定分页的引擎
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'utils.pagination.PageNumberPaginationManual',
+    #必须制定每页显示的数量
+    # 'PAGE_SIZE':3,
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

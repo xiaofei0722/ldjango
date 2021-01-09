@@ -7,7 +7,8 @@ from django.db.models import Q
 from django.views import View
 import json
 
-from rest_framework import status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, filters
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,7 +16,8 @@ from rest_framework.views import APIView
 from interfaces.models import Interface
 from projects.models import Projects
 from rest_framework.viewsets import ModelViewSet
-from projects.serializer import ProjectSerializer,ProjectModelSerializer
+from projects.serializer import ProjectModelSerializer
+from utils.pagination import PageNumberPaginationManual
 
 # def haha(request):
 #     if request.method == 'GET':
@@ -74,11 +76,35 @@ from projects.serializer import ProjectSerializer,ProjectModelSerializer
 
 
 class ProjectsList(GenericAPIView):
+    # 指定查询集
+    queryset = Projects.objects.all()
+    # 指定需要使用到的序列化器类
+    serializer_class = ProjectModelSerializer
+
+    #在视图类中制定过滤引擎
+    # filter_backends = [filters.OrderingFilter]
+    #制定需要排序的字段
+    ordering_fields = ['name','leader','id']
+    #制定类视图中制定过滤引擎
+    # filter_backends = [DjangoFilterBackend]
+    #制定需要过滤的字段
+    filterset_fields = ['name','leader','tester']
+    #在某个视图中制定分页类
+    # pagination_class = PageNumberPaginationManual
 
     def get(self,request):
         #获取数据库模型对象（项目表中所有数据）
-        project_qs = Projects.objects.all()
-
+        # project = Projects.objects.all()
+        #使用get_queryset获取查询集
+        project_qs = self.get_queryset()
+        #filter_queryset方法对查询集进行过滤
+        project_qs = self.filter_queryset(project_qs)
+        #将排序和过滤之后的查询集传给分页对象paginate_queryset，然后返回查询集
+        page = self.paginate_queryset(project_qs)
+        if page is not None:
+            serializer = ProjectModelSerializer(instance=page, many=True)
+            #可以使用get_paginated_response这个方法返回
+            return self.get_paginated_response(serializer.data)
         # project_list = []
         #
         # for project in project_qs:
@@ -96,7 +122,7 @@ class ProjectsList(GenericAPIView):
         #将模型对象传入序列化器（序列化）
         serializer = ProjectModelSerializer(instance=project_qs,many=True)
         #返回序列化器的data属性，safa是传入为非字典时需要加的参数
-        return JsonResponse(serializer.data,safe=False)
+        return Response(serializer.data)
 
     def post(self,request):
         #将请求数据存入变量
@@ -140,6 +166,9 @@ class ProjectsDetail(GenericAPIView):
     #指定需要使用到的序列化器类
     serializer_class = ProjectModelSerializer
 
+    #使用lookup_field类属性，可以修改组件路由名称 默认是pk
+    # lookup_field = id
+
     # def get_object(self,pk):
     #     try:
     #         return Projects.objects.get(id=pk)
@@ -161,6 +190,7 @@ class ProjectsDetail(GenericAPIView):
         # }
         #将对象传入序列化器（序列化）
         # serializer = ProjectModelSerializer(instance=project)
+        #使用get_serializer获取序列化器类
         serializer = self.get_serializer(instance=project)
 
         return Response(serializer.data,status=status.HTTP_200_OK)
