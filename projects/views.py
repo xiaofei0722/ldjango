@@ -18,6 +18,7 @@ from projects.models import Projects
 from rest_framework.viewsets import ModelViewSet
 from projects.serializer import ProjectModelSerializer
 from utils.pagination import PageNumberPaginationManual
+from rest_framework import generics
 
 # def haha(request):
 #     if request.method == 'GET':
@@ -75,9 +76,7 @@ from utils.pagination import PageNumberPaginationManual
 #         return HttpResponse('这是一个delete请求')
 
 #1.首先集成mixins，然后再集成GenericAPIView
-class ProjectsList(mixins.ListModelMixin,
-                   mixins.CreateModelMixin,
-                   GenericAPIView):
+class ProjectsList(generics.ListCreateAPIView):
     # 指定查询集
     queryset = Projects.objects.all()
     # 指定需要使用到的序列化器类
@@ -93,26 +92,26 @@ class ProjectsList(mixins.ListModelMixin,
     #在某个视图中制定分页类
     # pagination_class = PageNumberPaginationManual
 
-    def get(self,request,*args,**kwargs):
-        return self.list(request,*args,**kwargs)
-        # #获取数据库模型对象（项目表中所有数据）
-        # # project = Projects.objects.all()
-        # #使用get_queryset获取查询集
-        # project_qs = self.get_queryset()
-        # #filter_queryset方法对查询集进行过滤
-        # project_qs = self.filter_queryset(project_qs)
-        # #将排序和过滤之后的查询集传给分页对象paginate_queryset，然后返回查询集
-        # page = self.paginate_queryset(project_qs)
-        # if page is not None:
-        #     serializer = ProjectModelSerializer(instance=page, many=True)
-        #     #可以使用get_paginated_response这个方法返回
-        #     return self.get_paginated_response(serializer.data)
-        # serializer = self.get_serializer(instance=project_qs,many=True)
-        # #返回序列化器的data属性，safa是传入为非字典时需要加的参数
-        # return Response(serializer.data)
-
-    def post(self,request,*args,**kwargs):
-        return self.create(request,*args,**kwargs)
+    # def get(self,request,*args,**kwargs):
+    #     return self.list(request,*args,**kwargs)
+    #     # #获取数据库模型对象（项目表中所有数据）
+    #     # # project = Projects.objects.all()
+    #     # #使用get_queryset获取查询集
+    #     # project_qs = self.get_queryset()
+    #     # #filter_queryset方法对查询集进行过滤
+    #     # project_qs = self.filter_queryset(project_qs)
+    #     # #将排序和过滤之后的查询集传给分页对象paginate_queryset，然后返回查询集
+    #     # page = self.paginate_queryset(project_qs)
+    #     # if page is not None:
+    #     #     serializer = ProjectModelSerializer(instance=page, many=True)
+    #     #     #可以使用get_paginated_response这个方法返回
+    #     #     return self.get_paginated_response(serializer.data)
+    #     # serializer = self.get_serializer(instance=project_qs,many=True)
+    #     # #返回序列化器的data属性，safa是传入为非字典时需要加的参数
+    #     # return Response(serializer.data)
+    #
+    # def post(self,request,*args,**kwargs):
+    #     return self.create(request,*args,**kwargs)
         #将请求数据存入变量
         # json_data = request.body.decode('utf-8')
         # #将请求的json数据转化为字典
@@ -132,43 +131,40 @@ class ProjectsList(mixins.ListModelMixin,
         # # 返回序列化器的data属性
         # return Response(serializer.data)
 
-class ProjectsDetail(mixins.RetrieveModelMixin,
-                     mixins.UpdateModelMixin,
-                     mixins.DestroyModelMixin,
-                     GenericAPIView):
+class ProjectsDetail(generics.RetrieveUpdateDestroyAPIView):
     #指定查询集
     queryset = Projects.objects.all()
     #指定需要使用到的序列化器类
     serializer_class = ProjectModelSerializer
     #使用lookup_field类属性，可以修改组件路由名称 默认是pk
     # lookup_field = id
-    def get(self,request,*args,**kwargs):
-        return self.retrieve(request,*args,**kwargs)
-        # #获取数据库对象
-        # project = self.get_object()
-        # serializer = self.get_serializer(instance=project)
-        # return Response(serializer.data,status=status.HTTP_200_OK)
-
-    def put(self,request,*args,**kwargs):
-        return self.update(request,*args,**kwargs)
-        # 获取数据库对象
-        # project = self.get_object()
-        # #获取请求数据并传入序列化器（反序列化）
-        # json_data = request.body.decode('utf-8')
-        # python_data = json.loads(json_data, encoding='utf-8')
-        # # serializer = ProjectModelSerializer(instance=project,data=python_data)
-        # serializer = self.get_serializer(instance=project,data=python_data)
-        # try:
-        #     #验证修改数据
-        #     serializer.is_valid(raise_exception=True)
-        # except Exception as e:
-        #     return Response(serializer.errors)
-        # #保存后的数据进行序列化操作
-        # serializer.save()
-        # return Response(serializer.data,status=status.HTTP_201_CREATED)
-
-    def delete(self,request,*args,**kwargs):
-        return self.destroy(request,*args,**kwargs)
+    # def get(self,request,*args,**kwargs):
+    #     return self.retrieve(request,*args,**kwargs)
+    #     # #获取数据库对象
+    #     # project = self.get_object()
+    #     # serializer = self.get_serializer(instance=project)
+    #     # return Response(serializer.data,status=status.HTTP_200_OK)
+    #
+    # def put(self,request,*args,**kwargs):
+    #     return self.update(request,*args,**kwargs)
+    #     # 获取数据库对象
+    #     # project = self.get_object()
+    #     # #获取请求数据并传入序列化器（反序列化）
+    #     # json_data = request.body.decode('utf-8')
+    #     # python_data = json.loads(json_data, encoding='utf-8')
+    #     # # serializer = ProjectModelSerializer(instance=project,data=python_data)
+    #     # serializer = self.get_serializer(instance=project,data=python_data)
+    #     # try:
+    #     #     #验证修改数据
+    #     #     serializer.is_valid(raise_exception=True)
+    #     # except Exception as e:
+    #     #     return Response(serializer.errors)
+    #     # #保存后的数据进行序列化操作
+    #     # serializer.save()
+    #     # return Response(serializer.data,status=status.HTTP_201_CREATED)
+    #
+    # def delete(self,request,*args,**kwargs):
+    #     return self.destroy(request,*args,**kwargs)
         # project = self.get_object()
         # project.delete()
         # return Response(None,status=status.HTTP_204_NO_CONTENT)
