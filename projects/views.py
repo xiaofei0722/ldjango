@@ -170,7 +170,7 @@ from rest_framework import viewsets
 #         # project.delete()
 #         # return Response(None,status=status.HTTP_204_NO_CONTENT)
 
-class ProjectViewSet(viewsets.ViewSet):
+class ProjectViewSet(viewsets.GenericViewSet):
     queryset = Projects.objects.all()
     serializer_class = ProjectModelSerializer
     order_fields = ['name', 'leader']

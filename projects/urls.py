@@ -10,8 +10,18 @@ from rest_framework.routers import DefaultRouter
 urlpatterns = [
     # path('haha',views.haha),
     # path('',views.IndexView.as_view()),
-    path('',views.ProjectsList.as_view()),
-    path('<int:pk>/',views.ProjectsDetail.as_view())
+    # path('',views.ProjectsList.as_view()),
+    # path('<int:pk>/',views.ProjectsDetail.as_view())
+    path('',views.ProjectViewSet.as_view({
+        'get': 'list',
+        'post': 'create',
+    }),name='projects-list'),
+    path('<int:pk>/',views.ProjectViewSet.as_view({
+        'get':'retrieve',
+        'put':'update',
+        'delete':'destroy'
+    }))
 ]
+
 
 # urlpatterns += router.urls
