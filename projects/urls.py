@@ -4,6 +4,7 @@ from django.urls import include
 from projects import views
 from rest_framework.routers import DefaultRouter
 from rest_framework import routers
+from rest_framework.documentation import include_docs_urls
 
 router = DefaultRouter()
 # router.register(r'projects',views.ProjectViewSet)

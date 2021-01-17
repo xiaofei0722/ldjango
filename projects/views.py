@@ -177,6 +177,31 @@ from rest_framework.decorators import action
 #                      mixins.CreateModelMixin,
 #                      viewsets.GenericViewSet):
 class ProjectViewSet(viewsets.ModelViewSet):
+    """
+    create:
+    创建项目
+
+    retrieve:
+    获取项目详情数据
+
+    update:
+    完整更新项目
+
+    partial_update:
+    部分更新项目
+
+    destroy:
+    删除项目
+
+    list:
+    获取项目列表数据
+
+    name:
+    获取所有项目名字
+
+    interfaces:
+    获取指定项目的所有接口数据
+    """
     queryset = Projects.objects.all()
     serializer_class = ProjectModelSerializer
     order_fields = ['name', 'leader']
