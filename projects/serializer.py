@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+
+from interfaces.models import Interface
 from projects.models import Projects
 
 def is_unique_porject_name(name):
@@ -67,3 +69,21 @@ class ProjectModelSerializer(serializers.ModelSerializer):
     #     if '飞' not in attrs['tester'] and '飞' not in attrs['leader']:
     #         raise serializers.ValidationError('负责人或者测试人员必须名字带飞')
     #     return attrs
+
+class ProjectNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Projects
+        fields = ('id','name')
+
+class InterfacesNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Interface
+        fields = ('id','name','tester')
+        # fields = '__all__'
+
+class InterfacesByProjectIdSerializer(serializers.ModelSerializer):
+    #必须用从表对象名加_set
+    interface_set =InterfacesNameSerializer(read_only=True,many=True)
+    class Meta:
+        model = Projects
+        fields = ('id','interface_set')

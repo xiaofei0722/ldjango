@@ -16,11 +16,11 @@ from rest_framework import mixins
 from interfaces.models import Interface
 from projects.models import Projects
 from rest_framework.viewsets import ModelViewSet
-from projects.serializer import ProjectModelSerializer
+from projects.serializer import ProjectModelSerializer, ProjectNameSerializer, InterfacesByProjectIdSerializer
 from utils.pagination import PageNumberPaginationManual
 from rest_framework import generics
 from rest_framework import viewsets
-
+from rest_framework.decorators import action
 # def haha(request):
 #     if request.method == 'GET':
 #
@@ -170,42 +170,27 @@ from rest_framework import viewsets
 #         # project.delete()
 #         # return Response(None,status=status.HTTP_204_NO_CONTENT)
 
-class ProjectViewSet(viewsets.GenericViewSet):
+# class ProjectViewSet(mixins.ListModelMixin,
+#                      mixins.UpdateModelMixin,
+#                      mixins.RetrieveModelMixin,
+#                      mixins.DestroyModelMixin,
+#                      mixins.CreateModelMixin,
+#                      viewsets.GenericViewSet):
+class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Projects.objects.all()
     serializer_class = ProjectModelSerializer
     order_fields = ['name', 'leader']
     filterset_fields = ['name','leader','tester']
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
+    #可以使用action装饰器来声明自定义的动作
+    #默认情况下，实例方法名就是动作名
+    #detail参数用于指定该动作要处理的是否为详情资源对象（url是否需要传递Pk值）
+    @action(methods=['get'],detail=False,url_path='nm',url_name='url_name')
+    def names(self,request,*args,**kwargs):
+        queryset = self.get_queryset()
+        serializer = ProjectNameSerializer(instance=queryset,many=True)
         return Response(serializer.data)
-
-    def retrieve(self, request, *args, **kwargs):
+    @action(detail=True)
+    def interfaces(self,request,*args,**kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance)
+        serializer = InterfacesByProjectIdSerializer(instance=instance)
         return Response(serializer.data)
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
