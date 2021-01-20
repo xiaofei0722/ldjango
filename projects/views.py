@@ -21,6 +21,7 @@ from utils.pagination import PageNumberPaginationManual
 from rest_framework import generics
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework import permissions
 # def haha(request):
 #     if request.method == 'GET':
 #
@@ -206,6 +207,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectModelSerializer
     order_fields = ['name', 'leader']
     filterset_fields = ['name','leader','tester']
+    permission_classes = [permissions.IsAuthenticated]
     #可以使用action装饰器来声明自定义的动作
     #默认情况下，实例方法名就是动作名
     #detail参数用于指定该动作要处理的是否为详情资源对象（url是否需要传递Pk值）

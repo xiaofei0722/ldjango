@@ -38,21 +38,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'rest_framework',
-    'projects.apps.ProjectsConfig',
-    'interfaces.apps.InterfacesConfig',
     'django_filters',
     'drf_yasg',
-]
 
+    'projects.apps.ProjectsConfig',
+    'interfaces.apps.InterfacesConfig',
+    'user.apps.UserConfig',
+
+]
 REST_FRAMEWORK = {
-    #默认响应渲染类
-    'DEFAULT_RENDERER_CLASSES':(
-        #json渲染器为第一优先级
-        'rest_framework.renderers.JSONRenderer',
-        # #可浏览的api渲染器为第二优先级
-        'rest_framework.renderers.BrowsableAPIRenderer'
-    ),
+    # #默认响应渲染类
+    # 'DEFAULT_RENDERER_CLASSES':(
+    #     #json渲染器为第一优先级
+    #     'rest_framework.renderers.JSONRenderer',
+    #     # #可浏览的api渲染器为第二优先级
+    #     'rest_framework.renderers.BrowsableAPIRenderer'
+    # ),
     'DEFAULT_FILTER_BACKENDS':['rest_framework.filters.OrderingFilter',
                                'django_filters.rest_framework.DjangoFilterBackend'],
     #在全局制定分页的引擎
@@ -62,7 +65,10 @@ REST_FRAMEWORK = {
 
     # 'PAGE_SIZE':3,
     #指定接口文档
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
 
 MIDDLEWARE = [
@@ -154,3 +160,47 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s - [%(levelname)s] - %(name)s - [msg]%(message)s - [%(filename)s:%(lineno)d]'
+        },
+        'simple': {
+            'format': '%(asctime)s - [%(levelname)s] - [msg]%(message)s'
+        }
+    },
+    'handlers': {
+        'file': {
+             'level': 'INFO',
+             'class': 'logging.handlers.RotatingFileHandler',
+             'filename': os.path.join(BASE_DIR, 'logs/test.log'),  # 日志文件位置
+             'maxBytes': 100 * 1024 * 1024,  # 日志文件大小 100m
+             'backupCount': 10,  # 日志文件最大个数
+             'formatter': 'verbose',
+             'encoding': 'utf-8' # 防止输出的日志乱码
+        },
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+    },
+    'loggers': {
+        'mytest': {  # 定义了一个名为mytest的日志器
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',  # 日志器接受的最低日志级别
+            'propagate': True  # 是否继承父类的log信息
+        },
+    }
+}
