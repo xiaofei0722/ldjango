@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+import datetime
 import os
 from pathlib import Path
 # from rest_framework.renderers import BrowsableAPIRenderer , JSONRenderer
@@ -48,6 +49,13 @@ INSTALLED_APPS = [
     'user.apps.UserConfig',
 
 ]
+
+JWT_AUTH = {
+    #默认5分钟过期，可以使用JWT_EXPIRATION_DELTA来设置过期时间
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+}
+
 REST_FRAMEWORK = {
     # #默认响应渲染类
     # 'DEFAULT_RENDERER_CLASSES':(
