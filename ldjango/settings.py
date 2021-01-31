@@ -54,6 +54,8 @@ JWT_AUTH = {
     #默认5分钟过期，可以使用JWT_EXPIRATION_DELTA来设置过期时间
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_RESPONSE_PAYLOAD_HANDLER':
+    'utils.jwt_handler.jwt_response_payload_handler',
 }
 
 REST_FRAMEWORK = {
@@ -75,9 +77,9 @@ REST_FRAMEWORK = {
     #指定接口文档
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     #制定默认认证
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
