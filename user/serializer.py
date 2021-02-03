@@ -1,5 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from rest_framework.validators import UniqueValidator
+from rest_framework_jwt.settings import api_settings
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password_confirm = serializers.CharField(label='确认密码',
@@ -31,6 +34,8 @@ class RegisterSerializer(serializers.ModelSerializer):
                 'help_text': '邮箱',
                 'write_only': True,
                 'required': True,
+                #添加邮箱重复效验
+                'validators': [UniqueValidator(queryset=User.objects.all(), message="此邮箱已注册")]
             },
             'password': {
                 'label': '密码',
@@ -42,6 +47,24 @@ class RegisterSerializer(serializers.ModelSerializer):
                                    'max_length': '只允许6-20个字符的用户名'}
             },
         }
+    def validate(self, attrs):
+        password = attrs.get('password')
+        password_confirm = attrs.get('password_confirm')
+        if password != password_confirm:
+            raise serializers.ValidationError('两次输入密码不相同')
+        return attrs
 
     def create(self, validated_data):
-        pass
+        #移除数据库模型类中不存在的属性
+        validated_data.pop('password_confirm')
+        #保存数据
+        user = User.objects.create_user(**validated_data)
+
+        #创建手动创建token
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+        user.token = token
+        return user
