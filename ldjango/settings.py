@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #跨域处理
+    'corsheaders',
 
     'rest_framework',
     'django_filters',
@@ -49,6 +51,7 @@ INSTALLED_APPS = [
     'user.apps.UserConfig',
 
 ]
+
 
 JWT_AUTH = {
     #默认5分钟过期，可以使用JWT_EXPIRATION_DELTA来设置过期时间
@@ -90,6 +93,7 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
