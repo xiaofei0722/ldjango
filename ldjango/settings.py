@@ -100,6 +100,18 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+#添加白名单
+# CORS_ORIGIN_ALLOW_ALL为True，指定所有域名（ip）都可以访问后端接口，默认为False
+CORS_ORIGIN_ALLOW_ALL = True
+
+# CORS_ORIGIN_WHITELIST指定能够访问后端接口的ip或者域名列表(和上面的允许所以二选一)
+# CORS_ORIGIN_WHITELIST = [
+#     "http://127.0.0.1:8080",
+#     "http://localhost:8080"
+# ]
+
+# 允许跨域携带Cookie，默认为False
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'ldjango.urls'
 
