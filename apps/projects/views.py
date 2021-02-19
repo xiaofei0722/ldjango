@@ -13,7 +13,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import mixins
-from interfaces.models import Interface
+from interfaces.models import Interfaces
 from projects.models import Projects
 from rest_framework.viewsets import ModelViewSet
 from projects.serializer import ProjectModelSerializer, ProjectNameSerializer, InterfacesByProjectIdSerializer

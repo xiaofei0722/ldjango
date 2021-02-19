@@ -1,5 +1,5 @@
 from django.contrib import admin
-from interfaces.models import Interface
+from interfaces.models import Interfaces
 # Register your models here.
 
 class InterfaceAdmin(admin.ModelAdmin):
@@ -7,4 +7,4 @@ class InterfaceAdmin(admin.ModelAdmin):
     list_display = ['name',"tester"]
 
 
-admin.site.register(Interface,InterfaceAdmin)
+admin.site.register(Interfaces,InterfaceAdmin)

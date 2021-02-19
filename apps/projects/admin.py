@@ -1,5 +1,5 @@
 from django.contrib import admin
-from projects.models import Projects,Person
+from projects.models import Projects
 # Register your models here.
 
 class PreojectsAdmin(admin.ModelAdmin):
@@ -8,4 +8,4 @@ class PreojectsAdmin(admin.ModelAdmin):
     list_display = ['id','name','leader','tester']
 
 admin.site.register(Projects,PreojectsAdmin)
-admin.site.register(Person)
+# admin.site.register(Person)

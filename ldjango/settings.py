@@ -12,11 +12,12 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import datetime
 import os
 from pathlib import Path
+import sys
 # from rest_framework.renderers import BrowsableAPIRenderer , JSONRenderer
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+sys.path.insert(0,os.path.join(BASE_DIR,'apps'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -49,6 +50,12 @@ INSTALLED_APPS = [
     'projects.apps.ProjectsConfig',
     'interfaces.apps.InterfacesConfig',
     'user.apps.UserConfig',
+    'configures.apps.ConfiguresConfig',
+    'debugtalks.apps.DebugtalksConfig',
+    'envs.apps.EnvsConfig',
+    'reports.apps.ReportsConfig',
+    'testsuits.apps.TestsuitsConfig',
+    'testcases.apps.TestcasesConfig'
 
 ]
 
