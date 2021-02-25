@@ -1,223 +1,137 @@
-import json
+from rest_framework import viewsets, status
 
-from django.http import HttpResponse, JsonResponse, Http404
-from django.shortcuts import render
-from django.db.models import Q
-# Create your views here.
-from django.views import View
-import json
-
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status, filters
-from rest_framework.generics import GenericAPIView
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import mixins
-from interfaces.models import Interfaces
-from projects.models import Projects
-from rest_framework.viewsets import ModelViewSet
-from projects.serializer import ProjectModelSerializer, ProjectNameSerializer, InterfacesByProjectIdSerializer
-from utils.pagination import PageNumberPaginationManual
-from rest_framework import generics
-from rest_framework import viewsets
-from rest_framework.decorators import action
 from rest_framework import permissions
-# def haha(request):
-#     if request.method == 'GET':
-#
-#         haha = '这是一个get请求'
-#
-#         return HttpResponse(haha)
-#     if request.method == 'POST':
-#
-#         return HttpResponse('这是一个Post请求')
-#     else:
-#         return HttpResponse('这是一个其他请求')
+from rest_framework.response import Response
+
+from projects.models import Projects
+from interfaces.models import Interfaces
+from projects.serializer import ProjectModeSerializer, ProjectNameSerializer, ProjectsRunSerializer
+from rest_framework.decorators import action
+
+from projects.utils import get_count_by_project
+# from utils import common
+from datetime import datetime
+import os
+from django.conf import settings
+from envs.models import Envs
+from testcases.models import Testcases
 
 
-# class IndexView(View):
-#     def get(self,request):
-#         # one_obj = Projects(name='这是一个牛逼的项目',leader='leo',programer='xixi',publish_app='这是一个厉害的应用',desc='没有描述')
-#         # one_obj.save()
-#         # Projects.objects.create(name='这是一个好玩的项目',leader='aaa',programer='bbb',publish_app='这是一个好玩的应用',tester='xf',desc='没有描述')
-#         # a = Projects.objects.all()
-#         # one_obj = Projects.objects.get(id=1).leader
-#         # one_obj = Projects.objects.filter(desc__contains='简要')
-#
-#         # one_obj = Projects.objects.filter(interface__name='登录接口')
-#         # one_obj = Interface.objects.filter(project__name='接口自动化')
-#
-#         # one_obj = Projects.objects.filter(id__gt=2)
-#
-#         # one_obj = Projects.objects.filter(id=2,leader='张三')
-#         # one_obj = Projects.objects.filter(Q(id=2)| Q(leader='leo'))
-#
-#         # one_obj = Projects.objects.filter(desc__contains='描述')
-#         # one_obj = one_obj.filter(leader='leo').first().desc
-#
-#         # one_obj = Projects.objects.get(id=1)
-#         # one_obj.leader='肖飞大神'
-#         # one_obj.save()
-#
-#         # one_obj =Projects.objects.filter(name__contains='1')
-#         # one_obj1 = one_obj.first()
-#         # one_obj1.delete()
-#
-#         one_obj = Projects.objects.filter(id__gte=1).order_by('programer')
-#
-#         return HttpResponse(one_obj)
-#         # return HttpResponse('这是一个get请求,pk是'+str(pk))
-#         # return render(request, 'demo.html')
-#     def post(self,request):
-#         return HttpResponse('这是一个Post请求')
-#
-#     def put(self,request):
-#         return HttpResponse('这是一个Put请求')
-#
-#     def delete(self,request):
-#         return HttpResponse('这是一个delete请求')
 
-#1.首先集成mixins，然后再集成GenericAPIView
-# class ProjectsList(generics.ListCreateAPIView):
-#     # 指定查询集
-#     queryset = Projects.objects.all()
-#     # 指定需要使用到的序列化器类
-#     serializer_class = ProjectModelSerializer
-#     #在视图类中制定过滤引擎
-#     # filter_backends = [filters.OrderingFilter]
-#     #制定需要排序的字段
-#     ordering_fields = ['name','leader','id']
-#     #制定类视图中制定过滤引擎
-#     # filter_backends = [DjangoFilterBackend]
-#     #制定需要过滤的字段
-#     filterset_fields = ['name','leader','tester']
-#     #在某个视图中制定分页类
-#     # pagination_class = PageNumberPaginationManual
-#
-#     # def get(self,request,*args,**kwargs):
-#     #     return self.list(request,*args,**kwargs)
-#     #     # #获取数据库模型对象（项目表中所有数据）
-#     #     # # project = Projects.objects.all()
-#     #     # #使用get_queryset获取查询集
-#     #     # project_qs = self.get_queryset()
-#     #     # #filter_queryset方法对查询集进行过滤
-#     #     # project_qs = self.filter_queryset(project_qs)
-#     #     # #将排序和过滤之后的查询集传给分页对象paginate_queryset，然后返回查询集
-#     #     # page = self.paginate_queryset(project_qs)
-#     #     # if page is not None:
-#     #     #     serializer = ProjectModelSerializer(instance=page, many=True)
-#     #     #     #可以使用get_paginated_response这个方法返回
-#     #     #     return self.get_paginated_response(serializer.data)
-#     #     # serializer = self.get_serializer(instance=project_qs,many=True)
-#     #     # #返回序列化器的data属性，safa是传入为非字典时需要加的参数
-#     #     # return Response(serializer.data)
-#     #
-#     # def post(self,request,*args,**kwargs):
-#     #     return self.create(request,*args,**kwargs)
-#         #将请求数据存入变量
-#         # json_data = request.body.decode('utf-8')
-#         # #将请求的json数据转化为字典
-#         # python_data = json.loads(json_data,encoding='utf-8')
-#         # #将字典传入序列化器（反序列化）
-#         # serializer = self.get_serializer(data=python_data)
-#         # try:
-#         #     #验证反序列化数据
-#         #     serializer.is_valid(raise_exception=True)
-#         # except Exception as e:
-#         #     return Response(serializer.errors)
-#         # #将验证无误后的数据进行数据库新增操作
-#         # # project = Projects.objects.create(**serializer.validated_data)
-#         # serializer.save()
-#         # #将新增后的数据放入序列化器（序列化）
-#         #
-#         # # 返回序列化器的data属性
-#         # return Response(serializer.data)
-#
-# class ProjectsDetail(generics.RetrieveUpdateDestroyAPIView):
-#     #指定查询集
-#     queryset = Projects.objects.all()
-#     #指定需要使用到的序列化器类
-#     serializer_class = ProjectModelSerializer
-#     #使用lookup_field类属性，可以修改组件路由名称 默认是pk
-#     # lookup_field = id
-#     # def get(self,request,*args,**kwargs):
-#     #     return self.retrieve(request,*args,**kwargs)
-#     #     # #获取数据库对象
-#     #     # project = self.get_object()
-#     #     # serializer = self.get_serializer(instance=project)
-#     #     # return Response(serializer.data,status=status.HTTP_200_OK)
-#     #
-#     # def put(self,request,*args,**kwargs):
-#     #     return self.update(request,*args,**kwargs)
-#     #     # 获取数据库对象
-#     #     # project = self.get_object()
-#     #     # #获取请求数据并传入序列化器（反序列化）
-#     #     # json_data = request.body.decode('utf-8')
-#     #     # python_data = json.loads(json_data, encoding='utf-8')
-#     #     # # serializer = ProjectModelSerializer(instance=project,data=python_data)
-#     #     # serializer = self.get_serializer(instance=project,data=python_data)
-#     #     # try:
-#     #     #     #验证修改数据
-#     #     #     serializer.is_valid(raise_exception=True)
-#     #     # except Exception as e:
-#     #     #     return Response(serializer.errors)
-#     #     # #保存后的数据进行序列化操作
-#     #     # serializer.save()
-#     #     # return Response(serializer.data,status=status.HTTP_201_CREATED)
-#     #
-#     # def delete(self,request,*args,**kwargs):
-#     #     return self.destroy(request,*args,**kwargs)
-#         # project = self.get_object()
-#         # project.delete()
-#         # return Response(None,status=status.HTTP_204_NO_CONTENT)
-
-# class ProjectViewSet(mixins.ListModelMixin,
-#                      mixins.UpdateModelMixin,
-#                      mixins.RetrieveModelMixin,
-#                      mixins.DestroyModelMixin,
-#                      mixins.CreateModelMixin,
-#                      viewsets.GenericViewSet):
-class ProjectViewSet(viewsets.ModelViewSet):
+class ProjectsViewSet(viewsets.ModelViewSet):
     """
-    create:
-    创建项目
+    	list:
+    	获取项目列表数据
 
-    retrieve:
-    获取项目详情数据
+    	create:
+    	创建项目
 
-    update:
-    完整更新项目
+    	destroy:
+    	删除项目
 
-    partial_update:
-    部分更新项目
+    	update:
+    	完整更新项目
 
-    destroy:
-    删除项目
+    	partial_update:
+    	部分更新项目
 
-    list:
-    获取项目列表数据
+    	retrieve:
+    	获取项目详情数据
 
-    name:
-    获取所有项目名字
+    	names:
+    	获取所有项目ID和项目名
 
-    interfaces:
-    获取指定项目的所有接口数据
-    """
-    queryset = Projects.objects.all()
-    serializer_class = ProjectModelSerializer
-    order_fields = ['name', 'leader']
-    filterset_fields = ['name','leader','tester']
+    	interfaces:
+    	获取某个项目下的所有接口信息
+
+    	"""
+    queryset = Projects.objects.filter(is_delete=False)
+    serializer_class = ProjectModeSerializer
+    # 指定过滤引擎
+    # filter_fields = [DjangoFilterBackend]
+    filter_fields = ['id', 'name', 'tester']
+    # 指定权限类
     permission_classes = [permissions.IsAuthenticated]
-    #可以使用action装饰器来声明自定义的动作
-    #默认情况下，实例方法名就是动作名
-    #detail参数用于指定该动作要处理的是否为详情资源对象（url是否需要传递Pk值）
-    @action(methods=['get'],detail=False,url_path='nm',url_name='url_name')
-    def names(self,request,*args,**kwargs):
+
+    def perform_destroy(self, instance):
+        instance.is_delete = True
+        instance.save()  # 逻辑删除
+
+    # 可以是用action装饰器声明自定义的动作
+    # detail(url是否需要传递Pk，一条数据为True)
+    @action(methods=['get'], detail=False)
+    def names(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        serializer = ProjectNameSerializer(instance=queryset,many=True)
+        serializer = ProjectNameSerializer(instance=queryset, many=True)
         return Response(serializer.data)
+
     @action(detail=True)
-    def interfaces(self,request,*args,**kwargs):
-        instance = self.get_object()
-        serializer = InterfacesByProjectIdSerializer(instance=instance)
-        return Response(serializer.data)
+    def interfaces(self, request, pk=None):
+        interface_objs = Interfaces.objects.filter(project_id=pk, is_delete=False)
+        one_list = []
+        for obj in interface_objs:
+            one_list.append({
+                'id': obj.id,
+                'name': obj.name
+            })
+        return Response(data=one_list)
+
+    def list(self, request, *args, **kwargs):
+        # queryset = self.filter_queryset(self.get_queryset())
+        #
+        # page = self.paginate_queryset(queryset)
+        # if page is not None:
+        #     serializer = self.get_serializer(page, many=True)
+        #     datas = serializer.data
+        #     datas = get_count_by_project(datas)
+        #     return self.get_paginated_response(datas)
+        #
+        # serializer = self.get_serializer(queryset, many=True)
+        # datas = serializer.data
+        # datas = get_count_by_project(datas)
+        # return Response(datas)
+
+        response = super().list(request, *args, **kwargs)
+        response.data['results'] = get_count_by_project(response.data['results'])
+        return response
+
+    # @action(methods=['post'], detail=True)
+    # def run(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     serializer = self.get_serializer(instance, data=request.data)
+    #     serializer.is_valid()
+    #     datas = serializer.validated_data
+    #
+    #     env_id = datas.get('env_id')
+    #     testcase_dir_path = os.path.join(settings.SUITES_DIR, datetime.strftime(datetime.now(), '%Y%m%d%H%M%S%f'))
+    #     if not os.path.exists(testcase_dir_path):
+    #         os.mkdir(testcase_dir_path)
+    #
+    #     # first()返回queryset查询集第一项
+    #     env = Envs.objects.filter(id=env_id, is_delete=False).first()
+    #     # 项目下所有接口
+    #     interface_objs = Interfaces.objects.filter(is_delete=False, project=instance)
+    #
+    #     if not interface_objs.exists():
+    #         data_dict = {
+    #             'detail': '此项目下没有接口，无法运行'
+    #         }
+    #         return Response(data_dict, status=status.HTTP_400_BAD_REQUEST)
+    #
+    #     for inter_obj in interface_objs:
+    #         testcase_objs = Testcases.objects.filter(is_delete=False, interface=inter_obj)
+    #
+    #         for one_obj in testcase_objs:
+    #             # 生成yml文件
+    #             common.generate_testcase_files(one_obj, env, testcase_dir_path)
+    #
+    #     # 运行用例
+    #     return common.run_testcase(instance, testcase_dir_path)
+
+    def get_serializer_class(self):
+        if self.action == 'names':
+            return ProjectNameSerializer
+        elif self.action == 'run':
+            return ProjectsRunSerializer
+        else:
+            return self.serializer_class

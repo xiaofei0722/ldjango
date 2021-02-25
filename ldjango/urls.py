@@ -35,15 +35,15 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('projects.urls')),
-    # path('interface/',include('interfaces.urls'))
+    path('',include('interfaces.urls')),
     # path('api/',include('rest_framework.urls'))
     path('docs/',include_docs_urls(title='测试平台接口文档',
                                    description='这是一个牛逼的接口文档平台')),
 
-    re_path(r'^swagger(?P<format>\.json|\.yaml)$',
-            schema_view.without_ui(cache_timeout=0),name='schema-json'),
-    path('swagger/',schema_view.with_ui('swagger',cache_timeout=0),name='schema-swagger-ui'),
-    path('redoc/',schema_view.with_ui('redoc',cache_timeout=0),name='schema-redoc-ui'),
+    # re_path(r'^swagger(?P<format>\.json|\.yaml)$',
+    #         schema_view.without_ui(cache_timeout=0),name='schema-json'),
+    # path('swagger/',schema_view.with_ui('swagger',cache_timeout=0),name='schema-swagger-ui'),
+    # path('redoc/',schema_view.with_ui('redoc',cache_timeout=0),name='schema-redoc-ui'),
     path('api/',include('rest_framework.urls')),
 
     path('user/',include('user.urls')),

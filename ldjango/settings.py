@@ -82,8 +82,7 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'DEFAULT_PAGINATION_CLASS': 'utils.pagination.PageNumberPaginationManual',
     #必须制定每页显示的数量
-
-    # 'PAGE_SIZE':3,
+    'PAGE_SIZE':10,
     #指定接口文档
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     #制定默认认证
