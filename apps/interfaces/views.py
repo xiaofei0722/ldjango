@@ -57,26 +57,26 @@ from interfaces.utils import get_count_by_interface
 
 class InterfacesViewSet(viewsets.ModelViewSet):
     """
-        list:
-        获取接口列表数据
+    list:
+    获取接口列表数据
 
-        create:
-        创建接口
+    create:
+    创建接口
 
-        destroy:
-        删除接口
+    destroy:
+    删除接口
 
-        update:
-        完整更新接口
+    update:
+    完整更新接口
 
-    	partial_update:
-    	部分更新接口
+    partial_update:
+    部分更新接口
 
-    	retrieve:
-    	获取接口详情数据
+    retrieve:
+    获取接口详情数据
 
-    	names:
-    	获取所有接口ID和接口名
+    names:
+    获取所有接口ID和接口名
 
 
     """
@@ -123,7 +123,7 @@ class InterfacesViewSet(viewsets.ModelViewSet):
             })
         return Response(data=one_list)
 
-    @action(methods=['get'], detail=False, url_path='configures')
+    @action(methods=['get'], detail=False)
     def testcases(self, request, pk=None):
         testcase_objs = Testcases.objects.filter(interface_id=pk, is_delete=False)
         one_list = []
