@@ -91,20 +91,23 @@ class InterfacesViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         #过滤查询集的创建
-        queryset = self.filter_queryset(self.get_queryset())
-        #分页查询集的创建
-        page = self.paginate_queryset(queryset)
-        #如果要分页就把分页信息以及分页后处理的逻辑返回
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            datas = serializer.data
-            datas = get_count_by_interface(datas)
-            return self.get_paginated_response(datas)
-        #如果不分页就直接返回查询集信息
-        serializer = self.get_serializer(queryset, many=True)
-        datas = serializer.data
-        datas = get_count_by_interface(datas)
-        return Response(datas)
+        # queryset = self.filter_queryset(self.get_queryset())
+        # #分页查询集的创建
+        # page = self.paginate_queryset(queryset)
+        # #如果要分页就把分页信息以及分页后处理的逻辑返回
+        # if page is not None:
+        #     serializer = self.get_serializer(page, many=True)
+        #     datas = serializer.data
+        #     datas = get_count_by_interface(datas)
+        #     return self.get_paginated_response(datas)
+        # #如果不分页就直接返回查询集信息
+        # serializer = self.get_serializer(queryset, many=True)
+        # datas = serializer.data
+        # datas = get_count_by_interface(datas)
+        # return Response(datas)
+        response = super().list(request,*args,**kwargs)
+        response.data['results'] = get_count_by_interface(response.data['results'])
+        return response
 
     @action(methods=['get'], detail=False)
     def names(self, request, *args, **kwargs):
@@ -112,7 +115,7 @@ class InterfacesViewSet(viewsets.ModelViewSet):
         serializer = InterfacesNameSerializer(instance=queryset, many=True)
         return Response(serializer.data)
 
-    @action(methods=['get'], detail=False, url_path='configures')
+    @action(methods=['get'], detail=True, url_path='configs')
     def configures(self, request, pk=None):
         configure_objs = Configures.objects.filter(interface_id=pk, is_delete=False)
         one_list = []
@@ -123,7 +126,7 @@ class InterfacesViewSet(viewsets.ModelViewSet):
             })
         return Response(data=one_list)
 
-    @action(methods=['get'], detail=False)
+    @action(methods=['get'], detail=True)
     def testcases(self, request, pk=None):
         testcase_objs = Testcases.objects.filter(interface_id=pk, is_delete=False)
         one_list = []
