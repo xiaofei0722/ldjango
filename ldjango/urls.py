@@ -37,6 +37,7 @@ urlpatterns = [
     path('',include('projects.urls')),
     path('',include('interfaces.urls')),
     path('',include('envs.urls')),
+    path('',include('debugtalks.urls')),
     # path('api/',include('rest_framework.urls'))
     path('docs/',include_docs_urls(title='测试平台接口文档',
                                    description='这是一个牛逼的接口文档平台')),

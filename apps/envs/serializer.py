@@ -6,8 +6,6 @@ from projects.models import Projects
 
 
 class EnvsModelSerializer(serializers.ModelSerializer):
-    project = serializers.StringRelatedField(help_text='项目名称')
-    project_id = serializers.PrimaryKeyRelatedField(queryset=Projects.objects.all(), help_text='项目ID')
     class Meta:
         model = Envs
         exclude = ('update_time', 'is_delete')
@@ -29,7 +27,7 @@ class EnvsModelSerializer(serializers.ModelSerializer):
 #             validated_data['project'] = project
 #         return super().update(instance, validated_data)
 #
-# class InterfacesNameSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Interfaces
-#         fields = ('id', 'name')
+class EnvsNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Envs
+        fields = ('id', 'name')
