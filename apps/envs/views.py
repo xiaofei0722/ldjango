@@ -34,7 +34,6 @@ class EnvsViewSet(viewsets.ModelViewSet):
     names:
     获取所有环境变量ID和接口名
 
-
     """
     queryset = Envs.objects.filter(is_delete=False)
     serializer_class = EnvsModelSerializer
