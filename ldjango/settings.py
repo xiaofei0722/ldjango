@@ -198,7 +198,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-
+#测试报告html文件所在目录
+REPORTS_DIR = os.path.join(BASE_DIR, 'reports')
 
 
 LOGGING = {
