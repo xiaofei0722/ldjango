@@ -44,14 +44,11 @@ class TestcasesModelSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         interface_dict = validated_data.pop('interface')
         validated_data['interface_id'] = interface_dict['iid']
-        return Configures.objects.create(**validated_data)
+        return Testcases.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         if 'interface' in validated_data:
             interface_dict = validated_data.pop('interface')
             validated_data['interface_id'] = interface_dict['iid']
         return super().update(instance, validated_data)
-class InterfacesNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Interfaces
-        fields = ('id', 'name')
+
