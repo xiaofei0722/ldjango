@@ -200,7 +200,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 #测试报告html文件所在目录
 REPORTS_DIR = os.path.join(BASE_DIR, 'reports')
-
+#测试yaml文件所在目录
+SUITES_DIR = os.path.join(BASE_DIR, 'suites')
 
 LOGGING = {
     'version': 1,

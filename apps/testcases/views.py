@@ -1,3 +1,7 @@
+import os
+from datetime import datetime
+
+from django.conf import settings
 from django.shortcuts import render
 
 # Create your views here.
@@ -7,15 +11,17 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework import permissions
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from configures.models import Configures
 from configures.serializer import ConfiguresModelSerializer
+from envs.models import Envs
 from interfaces.models import Interfaces
 from testcases.models import Testcases
-from testcases.serializer import TestcasesModelSerializer
-from utils import handle_datas
+from testcases.serializer import TestcasesModelSerializer,TestcaseRunSerializer
+from utils import handle_datas, common
 
 
 class TestCasesViewSet(ModelViewSet):
@@ -37,6 +43,9 @@ class TestCasesViewSet(ModelViewSet):
 
     retrieve:
     获取配置信息详情数据
+
+    run:
+    运行用例
 
     """
     queryset = Testcases.objects.filter(is_delete=False)
@@ -127,3 +136,25 @@ class TestCasesViewSet(ModelViewSet):
         }
 
         return Response(datas)
+
+    @action(methods=['post'], detail=True)
+    def run(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        datas = serializer.validated_data
+        env_id = datas.get('env_id')
+        testcase_dir_path = os.path.join(settings.SUITES_DIR, datetime.strftime(datetime.now(), '%Y%m%d%H%M%S%f'))
+        os.mkdir(testcase_dir_path)
+
+        env = Envs.objects.filter(id=env_id, is_delete=False).first()
+
+        #生成yaml用例文件
+        common.generate_testcase_files(instance, env, testcase_dir_path)
+
+        #运行用例
+        return common.run_testcase(instance, testcase_dir_path)
+
+
+    def get_serializer_class(self):
+        return TestcaseRunSerializer if self.action == 'run' else self.serializer_class

@@ -15,7 +15,7 @@ import os
 from django.conf import settings
 from envs.models import Envs
 from testcases.models import Testcases
-
+from utils import common
 
 
 class ProjectsViewSet(viewsets.ModelViewSet):
@@ -135,3 +135,34 @@ class ProjectsViewSet(viewsets.ModelViewSet):
             return ProjectsRunSerializer
         else:
             return self.serializer_class
+
+    @action(methods=['post'], detail=True)
+    def run(self, request, pk=None):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        datas = serializer.validated_data
+        env_id = datas.get('env_id')
+
+        #创建测试用例所在目录名
+        testcase_dir_path = os.path.join(settings.SUITES_DIR, datetime.strftime(datetime.now(), '%Y%m%d%H%M%S%f'))
+
+        if not os.path.exists(testcase_dir_path):
+            os.mkdir(testcase_dir_path)
+
+        env = Envs.objects.filter(id=env_id, is_delete=False).first()
+        interface_objs = Interfaces.objects.filter(is_delete=False, project=instance)
+
+        if not interface_objs.exists():
+            data_dict = {
+                'detail': '此项目下无接口，无法运行'
+            }
+            return Response(data_dict, status=status.HTTP_400_BAD_REQUEST)
+
+        for inter_obj in interface_objs:
+            testcase_objs = Testcases.objects.filter(is_delete=False, interface=interface_objs)
+
+            for one_obj in testcase_objs:
+                common.generate_testcase_files(one_obj,env,testcase_dir_path)
+
+        return common.run_testcase(instance, testcase_dir_path)

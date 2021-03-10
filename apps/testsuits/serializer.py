@@ -33,3 +33,10 @@ class TestSuitsNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Testsuits
         fields = ('id', 'name')
+
+class TestsuitsRunSerializer(serializers.ModelSerializer):
+    env_id = serializers.IntegerField(help_text="环境变量ID", write_only=True)
+
+    class Meta:
+        model = Testsuits
+        fields = ('id', 'env_id')

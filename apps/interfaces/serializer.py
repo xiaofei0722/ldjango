@@ -32,3 +32,10 @@ class InterfacesNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Interfaces
         fields = ('id', 'name')
+
+class InterfacesRunSerializer(serializers.ModelSerializer):
+    env_id = serializers.IntegerField(help_text="环境变量ID", write_only=True)
+
+    class Meta:
+        model = Interfaces
+        fields = ('id', 'env_id')

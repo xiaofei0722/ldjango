@@ -1,15 +1,20 @@
+import os
+from datetime import datetime
+
 from django.shortcuts import render
 
 # Create your views here.
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
-from rest_framework import mixins, permissions
+from rest_framework import mixins, permissions, status
 from rest_framework.response import Response
 
+from envs.models import Envs
 from interfaces.models import Interfaces
 from configures.models import Configures
+from ldjango import settings
 from testcases.models import Testcases
-from interfaces.serializer import InterfacesModelSerializer, InterfacesNameSerializer
+from interfaces.serializer import InterfacesModelSerializer, InterfacesNameSerializer, InterfacesRunSerializer
 from rest_framework import viewsets
 
 #
@@ -53,6 +58,7 @@ from rest_framework import viewsets
 #     def delete(self,request,*args,**kwargs):
 #         return self.destroy(request,*args,**kwargs)
 from interfaces.utils import get_count_by_interface
+from utils import common
 
 
 class InterfacesViewSet(viewsets.ModelViewSet):
@@ -137,3 +143,34 @@ class InterfacesViewSet(viewsets.ModelViewSet):
             })
         return Response(data=one_list)
 
+    @action(methods=['post'], detail=True)
+    def run(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid()
+        datas = serializer.validated_data
+
+        env_id = datas.get('env_id')
+        testcase_dir_path = os.path.join(settings.SUITES_DIR, datetime.strftime(datetime.now(), '%Y%m%d%H%M%S%f'))
+        if not os.path.exists(testcase_dir_path):
+            os.mkdir(testcase_dir_path)
+
+        # first()返回queryset查询集第一项
+        env = Envs.objects.filter(id=env_id, is_delete=False).first()
+        # 项目下所有接口
+        testcase_objs = Testcases.objects.filter(is_delete=False, interface=instance)
+
+        if not testcase_objs.exists():
+            data_dict = {
+                'detail': '此接口下没有用例，无法运行'
+            }
+            return Response(data_dict, status=status.HTTP_400_BAD_REQUEST)
+
+        for one_obj in testcase_objs:
+            common.generate_testcase_files(one_obj, env, testcase_dir_path)
+
+        # 运行用例
+        return common.run_testcase(instance, testcase_dir_path)
+
+    def get_serializer_class(self):
+        return InterfacesRunSerializer if self.action == 'run' else self.serializer_class
