@@ -35,7 +35,7 @@ def handle_data2(datas):
                     'value': value,
                     'param_type': handle_param_type(value)
                 })
-        return result_list
+    return result_list
 
 
 def handle_data3(datas):

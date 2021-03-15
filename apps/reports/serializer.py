@@ -9,7 +9,7 @@ from testsuits.models import Testsuits
 
 class ReportsModelSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Testsuits
+        model = Reports
         # fields = ('id','name','project','project_id','create_time','update_time','include')
         exclude = ('update_time', 'is_delete')
         extra_kwarge = {

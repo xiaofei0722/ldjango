@@ -69,7 +69,7 @@ class TestCasesViewSet(ModelViewSet):
 
         #处理用例的validate列表
         testcase_validate = testcase_request.get('test').get('validate')
-        testcase_validate_list = handle_datas.handle_data4(testcase_validate)
+        testcase_validate_list = handle_datas.handle_data3(testcase_validate)
 
         #处理用例的param数据
         testcase_param = testcase_request_datas.get('param')

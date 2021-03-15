@@ -1,0 +1,13 @@
+- config:
+    name: 请求百度
+    request:
+      base_url: http://www.baidu.com
+- test:
+    name: 请求百度
+    request:
+      method: GET
+      url: /
+    validate:
+    - check: status_code
+      comparator: equals
+      expected: 200

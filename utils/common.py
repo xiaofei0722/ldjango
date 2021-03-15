@@ -1,9 +1,11 @@
 import json
 import os
-from datetime import datetime
+import datetime
 
 from httprunner.task import HttpRunner
 import yaml
+from rest_framework import status
+from rest_framework.response import Response
 
 from configures.models import Configures
 from debugtalks.models import Debugtalks
@@ -27,14 +29,14 @@ def generate_testcase_files(instance, env, testcase_dir_path):
     #获取当前用例的请求信息
     request = json.loads(instance.request, encoding='utf-8')
 
-    interface_name = instance.intercase.name#接口名称
+    interface_name = instance.interface.name#接口名称
     project_name = instance.interface.project.name#项目名称
 
     testcase_dir_path = os.path.join(testcase_dir_path, project_name)
     #创建项目名所在文件夹
     if not os.path.exists(testcase_dir_path):
         os.mkdir(testcase_dir_path)
-        debugtalk_obj = Debugtalks.objects.filter(is_delete=False, project_name=project_name).first()
+        debugtalk_obj = Debugtalks.objects.filter(is_delete=False, project__name=project_name).first()
         if debugtalk_obj:
             debugtalk = debugtalk_obj.debugtalk
         else:
@@ -82,27 +84,32 @@ def run_testcase(instance, testcase_dir_path):
     try:
         report_name = instance.name
     except Exception as e:
-        report_name = '被遗弃的报告' + '-' +datetime.strftime(datetime.now())
+        report_name = '被遗弃的报告' + '-' +datetime.datetime.strftime(datetime.now())
 
     report_id = create_report(runner, report_name=report_name)
+    data_dict = {
+        'id': report_id
+    }
+
+    return Response(data_dict, status=status.HTTP_201_CREATED)
 
 
 def timestamp_to_datetime(summary, type=True):
     if not type:
         time_stamp = int(summary['time']['start_at'])
-        summary['time']['start_datetime'] = datetime.fromtimestamp(time_stamp).strftime('%Y-%m-%d %H:%M:%S')
+        summary['time']['start_datetime'] = datetime.datetime.fromtimestamp(time_stamp).strftime('%Y-%m-%d %H:%M:%S')
 
     for detail in summary['details']:
         try:
             time_stamp = int(detail['time']['start_at'])
-            detail['time']['start_at'] = datetime.fromtimestamp(time_stamp)
+            detail['time']['start_at'] = datetime.datetime.fromtimestamp(time_stamp)
         except Exception:
             pass
 
         for record in detail['records']:
             try:
                 time_stamp = int(record['meta_data']['request']['start_timestamp'])
-                record['meta_data']['request']['start_timestamp'] = datetime.fromtimestamp(time_stamp).strftime('%Y-%m-%d %H:%M:%S')
+                record['meta_data']['request']['start_timestamp'] = datetime.datetime.fromtimestamp(time_stamp).strftime('%Y-%m-%d %H:%M:%S')
             except Exception:
                 pass
     return summary
@@ -110,7 +117,7 @@ def timestamp_to_datetime(summary, type=True):
 def create_report (runner, report_name=None):
     # 创建报告到数据库
     time_stamp = int(runner.summary["time"]["start_at"])
-    start_datetime = datetime.fromtimestamp(time_stamp).strftime(
+    start_datetime = datetime.datetime.fromtimestamp(time_stamp).strftime(
         '%Y-%m-%d %H:%M:%S')
     runner.summary['time']['start_datetime'] = start_datetime
     # duration保留3位小数
@@ -130,9 +137,9 @@ def create_report (runner, report_name=None):
         except Exception as e:
             continue
 
-    summary = json.dumps(runner.summary, ensure_ascii=False)
+    summary = json.dumps(runner.summary, cls=DateEncoder,ensure_ascii=False)
 
-    report_name = report_name + '_' + datetime.strftime(datetime.now(), '%Y%m%d%H%M%S')
+    report_name = report_name + '_' + datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S')
     report_path = runner.gen_html_report(html_report_name=report_name)
 
     with open(report_path, encoding='utf-8') as stream:
@@ -149,4 +156,16 @@ def create_report (runner, report_name=None):
 
     report_obj = Reports.objects.create(**test_report)
     return report_obj.id
+
+class DateEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            return obj.strftime('%Y-%m-%d %H:%M:%S')
+
+        elif isinstance(obj, datetime.date):
+            return obj.strftime("%Y-%m-%d")
+
+        else:
+            return json.JSONEncoder.default(self, obj)
+
 

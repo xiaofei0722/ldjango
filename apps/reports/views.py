@@ -55,7 +55,7 @@ class ReportsViewSet(ModelViewSet):
         return response
 
     @action(detail=True)
-    def download(self, request, pf=None):
+    def download(self, request, pk=None):
         instance = self.get_object()
         html = instance.html
         name = instance.name
